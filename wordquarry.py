@@ -1,118 +1,126 @@
 import random
 import numpy as np
 import pandas as pd
-import time
 
 def create_board(board_size):
+    '''
+    Create an X-by-Y board, initialized with underscores '_'.
+
+    Parameters
+    ----------
+    board_size : list of int
+        Row and column count for the board
+
+    Returns
+    -------
+    np.array
+        2D board initialized with underscores
+    '''
+
     board = np.chararray(board_size, unicode = True)
     board[:] = '_'
 
-    #print(f'Created board:\n\n{board}')
     return board
 
 def check_free(board, idx):
-    #print(f'Checking {idx}')
+    '''
+    Check if the given cell is unoccupied on the board and the index values
+    are not outside the board dimensions.
+
+    Parameters
+    ----------
+    board : np.array
+        2D game board
+    idx : list
+        Row and column index to be checked on the <board>
+
+    Returns
+    -------
+    bool
+        True if cell is free and playable, False otherwise
+    '''
+
+    # Check valid indices
     conditions = [idx[0] < board.shape[0],
                   idx[0] >= 0,
                   idx[1] < board.shape[1],
                   idx[1] >= 0]
+
     if not all(conditions):
         return False
+
+    # Check cell occupancy
     if board[idx[0], idx[1]] == '_':
         return True
     else:
         return False
 
 def get_surrounding(board, idx):
+    '''
+    Get neighbouring cells which are free to play
+    (not occupied or outside the board).
+
+    Parameters
+    ----------
+    board : np.array
+        2D game board
+    idx : list
+        Row and column index to be checked on the <board>
+
+    Returns
+    -------
+    list of list of int
+        List of valid [row, column] coordinate pairs around <idx>
+    '''
+
     surrounding = [(idx[0] + dx, idx[1] + dy)
                    for dx in (-1, 0, 1)
                    for dy in (-1, 0, 1) 
                    if not (dx == 0 and dy == 0)]
+    
     for i in range(len(surrounding) - 1, -1, -1):
         if not check_free(board, surrounding[i]):
             surrounding.pop(i)
+
     return surrounding
 
-def explore_region(board, start_idx):
-    visited = set()
-    to_visit = [start_idx]
-    while to_visit:
-        current = to_visit.pop()
-        if current not in visited:
-            visited.add(current)
-            neighbors = get_surrounding(board, current)
-            for neighbor in neighbors:
-                if neighbor not in visited:
-                    to_visit.append(neighbor)
-    return visited
-
-def check_tree_length(check_idx):
-    def dfs(node, visited, depth):
-        #print(f'Checking {node}, depth {depth}')
-        if depth >= 3:
-            return True
-        visited.add(node)
-        for neighbor in get_surrounding(board, node):
-            if neighbor not in visited:
-                if dfs(neighbor, visited, depth + 1):
-                    return True
-        visited.remove(node)
-        return False
-
-    return dfs(check_idx, set(), 1)
-
-def check_blocking(board, idx, min_length = 3):
+def clear_coords(board, coords):
     '''
-    Check that the current word does not create any unreachable pockets of
-    less than min_length letters.
+    Reset given <coords> on the <board> as underscores.
 
     Parameters
     ----------
-    idx : list
-        XY coordinates of the letter about to be placed
-    min_length : int, optional
-        Minimum word length, pockets smaller than this are prevented, by default 3
-
+    board : np.array
+        2D game board
+    coords : list of list of int
+        List of [row, column] coordinate pairs to clear from <board>
+    
     Returns
     -------
     bool
-        True if the placed character is blocking (creates pockets)
-        False otherwise
+        True in all cases
     '''
-    return False
 
-    surrounding = get_surrounding(board, idx)
-
-    board[idx[0], idx[1]] = '$'
-
-    for check_idx in surrounding:
-        if not check_tree_length(check_idx):
-            board[idx[0], idx[1]] = '_'
-            return True
-
-    return False
-
-def next_idx(board, idx):
-    free = False
-    surrounding = get_surrounding(board, idx)
-
-    while not free:
-        if len(surrounding) == 0:
-            return False
-        
-        idx_new = random.choice(surrounding)
-        free = check_free(board, idx_new) and not check_blocking(board, idx_new)
-
-        if not free:
-            surrounding.remove(idx_new)
-
-    return idx_new
-
-def clear_coords(board, coords):
     for coord in coords:
         board[coord[0], coord[1]] = '_'
+    
+    return True
 
 def starting_slots(board):
+    '''
+    Check valid starting slots for given <board>.
+
+    Parameters
+    ----------
+    board : np.array
+        2D game board
+
+    Returns
+    -------
+    list of tuple of int
+        List of valid starting point (row, column) coordinate pairs on <board>
+    '''
+
     free = [(x, y) for x in range(board.shape[0])
                    for y in range(board.shape[1])
                    if board[x, y] == '_']
@@ -120,6 +128,30 @@ def starting_slots(board):
     return free
 
 def place_word(board, word, start_positions = None):
+    '''
+    Recursively place the given <word> on the <board>, trying out all possible
+    <start_positions> in the process.
+
+    Parameters
+    ----------
+    board : np.array
+        2D game board
+    word : str
+        A word to be placed on the board, a single character is clipped from the
+        beginning for each recursive layer
+    start_positions : list of list of int, optional
+        The set of character placement locations to be tested. In the beginning
+        the parameter is chosen by the <starting_slots> function, but it is
+        updated for each recursion to hold the empty neighbouring cells,
+        by default None
+
+    Returns
+    -------
+    bool
+        True if word placement succeeded, False otherwise.
+    '''
+
+    # Reached the end of recursion tree
     if len(word) == 0:
         return True
     
@@ -130,19 +162,18 @@ def place_word(board, word, start_positions = None):
         start_positions = starting_slots(board)
     
     while free == False:
+        # All directions have been checked, failure
         if len(start_positions) == 0:
             clear_coords(board, used_coords)
             return False
         
+        # Pick a new direction for the search
         idx = random.choice(start_positions)
-        free = check_free(board, idx) and not check_blocking(board, idx)
-        if not free:
-            start_positions.remove(idx)
-            continue
     
         board[idx[0], idx[1]] = word[0]
         used_coords.append((idx[0], idx[1]))
 
+        # We need to go deeper
         if place_word(board, word[1:], get_surrounding(board, idx)):
             return True
         else:
@@ -151,6 +182,23 @@ def place_word(board, word, start_positions = None):
     return False
 
 def choose_words(board, wordlist):
+    '''
+    Choose words from the list so that their total length equals the number
+    of cells in <board>. The minimum word length is currently hard-coded as 3.
+
+    Parameters
+    ----------
+    board : np.array
+        2D game board
+    wordlist : pd.DataFrame
+        List of words and their lengths in DataFrame columns
+
+    Returns
+    -------
+    list of str
+        List of words chosen for the game
+    '''
+
     words = []
     chars = board.shape[0] * board.shape[1]
 
@@ -167,7 +215,7 @@ def choose_words(board, wordlist):
             words.append(word)
     
     print(f'Words: {words}')
-    return(words)
+    return words
 
 if __name__ == "__main__":
     wordlist = pd.read_csv('finwords_noCompounds.txt')
