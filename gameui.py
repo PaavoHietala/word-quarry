@@ -1,3 +1,9 @@
+'''
+TODO: Combine clicked_letters and selected_letters
+TODO: Add all functionality to buttonClicked() (blocked squares)
+TODO: Create "check word"-button based on code in linetest.py
+'''
+
 from PyQt5.QtWidgets import (QWidget,
                              QGridLayout,
                              QPushButton,
@@ -90,7 +96,6 @@ class GameUI(QWidget):
         self.show()
     
     def toggleCursor(self):
-        # Toggle cursor visibility
         self.cursor_visible = not self.cursor_visible
 
         if self.cursor_visible:
@@ -110,33 +115,48 @@ class GameUI(QWidget):
         style.unpolish(widget)
         style.polish(widget)
         widget.update()
-    
-    def updateButtonStyles(self):
-        # Color selected letters
-        for idx in self.selected_letters[:-1]:
-            self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
-                                   'LetterSelected')          
-        
-        idx = self.selected_letters[-1]
-        self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
-                               'LetterSelectedLast')
-        
-        # Color blocked buttons
-
-        # Color available buttons
 
     def buttonClicked(self):
         button = self.sender()
 
+        # Blocked is clicked
+
+        # Last selected is clicked
+        if len(self.selected_letters) > 0 and \
+           button.property('index') == self.selected_letters[-1]:
+            if self.cursor_visible:
+                self.clicked_letters = self.clicked_letters[:-2] + '|'
+            else:
+                self.clicked_letters = self.clicked_letters[:-1]
+
+            self.selected_letters.pop()
+
+            if len(self.selected_letters) > 0:
+                prev_idx = self.selected_letters[-1]
+                prev_btn = self.buttons[prev_idx[0]][prev_idx[1]]
+                self.updateWidgetStyle(prev_btn, 'LetterSelectedLast')
+
+            self.updateWidgetStyle(button, 'LetterButton')
+            self.updateLetterLine()
+
+            return
+
+        # Available is clicked
         if self.cursor_visible == True:
             self.clicked_letters = self.clicked_letters[:-1] + button.text() + '|'
         else:
             self.clicked_letters += button.text()
 
-        self.selected_letters.append(button.property('index'))
-
         self.updateLetterLine()
-        self.updateButtonStyles()
+
+        if len(self.selected_letters) > 0:
+            for idx in self.selected_letters:
+                self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
+                                       'LetterSelected') 
+
+        self.updateWidgetStyle(button, 'LetterSelectedLast')
+
+        self.selected_letters.append(button.property('index'))
 
     def resetBoard(self):
         self.clicked_letters = ''
