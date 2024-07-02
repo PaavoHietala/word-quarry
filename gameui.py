@@ -13,6 +13,7 @@ class GameUI(QWidget):
     def __init__(self, board):
         super().__init__()
         self.clicked_letters = '|'
+        self.selected_letters = []
         self.board = board
         self.initUI()
 
@@ -25,7 +26,7 @@ class GameUI(QWidget):
         
         # Label to display clicked letters
         self.letter_display = QLabel(self.clicked_letters)
-        self.letter_display.setFont(QFont('Arial', 18))
+        self.letter_display.setFont(QFont('Roboto', 20))
         self.letter_display.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.letter_display)
 
@@ -64,8 +65,9 @@ class GameUI(QWidget):
             for j in range(self.board.board.shape[1]):
                 button = QPushButton(self.board.board[i, j].upper())
 
-                button.setFont(QFont('Arial', 18))
+                button.setFont(QFont('Roboto', 18))
                 button.setObjectName("LetterButton")
+                button.setProperty('index', (i,j))
 
                 button.clicked.connect(self.buttonClicked)
                 grid.addWidget(button, i, j)
@@ -74,7 +76,7 @@ class GameUI(QWidget):
             self.buttons.append(row)
 
         reset_button = QPushButton("Reset")
-        reset_button.setFont(QFont('Arial', 18, QFont.Bold))
+        reset_button.setFont(QFont('Roboto', 18))
         reset_button.setObjectName("ResetButton")
 
         reset_button.clicked.connect(self.resetBoard)
@@ -97,6 +99,23 @@ class GameUI(QWidget):
 
     def updateLetterLine(self):
         self.letter_display.setText(self.clicked_letters)
+    
+    def updateWidgetStyle(self, widget, name):
+        widget.setObjectName(name)
+        style = widget.style()
+        style.unpolish(widget)
+        style.polish(widget)
+        widget.update()
+    
+    def updateButtonStyles(self):
+        for idx in self.selected_letters[:-1]:
+            self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
+                                   'LetterSelected')          
+        
+        idx = self.selected_letters[-1]
+
+        self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
+                               'LetterSelectedLast')
 
     def buttonClicked(self):
         button = self.sender()
@@ -108,10 +127,19 @@ class GameUI(QWidget):
 
         self.updateLetterLine()
 
+        self.selected_letters.append(button.property('index'))
+        print(self.selected_letters)
+
+        self.updateButtonStyles()
+
     def resetBoard(self):
-        self.board.fill_board()
         self.clicked_letters = ''
+        self.selected_letters = []
+
         self.updateLetterLine()
+        self.board.fill_board()
+
         for i in range(self.board.board.shape[0]):
             for j in range(self.board.board.shape[1]):
                 self.buttons[i][j].setText(self.board.board[i, j].upper())
+                self.updateWidgetStyle(self.buttons[i][j], 'LetterButton')

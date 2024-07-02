@@ -16,6 +16,28 @@ QPushButton#LetterButton:hover {
     background-color: lightskyblue;
 }
 
+QPushButton#LetterSelected {
+    background-color: cornflowerblue;
+    border: blue;
+    color: black;
+    border-radius: 10px;
+    min-width: 100px;
+    min-height: 100px;
+    max-width: 100px;
+    max-height: 100px;
+}
+
+QPushButton#LetterSelectedLast {
+    background-color: darkslateblue;
+    border: blue;
+    color: black;
+    border-radius: 10px;
+    min-width: 100px;
+    min-height: 100px;
+    max-width: 100px;
+    max-height: 100px;
+}
+
 QPushButton#ResetButton {
     background-color: blue;
     color: white;
