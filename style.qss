@@ -24,3 +24,8 @@ QPushButton#ResetButton {
 QPushButton#ResetButton:hover {
     background-color: lightgray;
 }
+
+QFrame {
+    color: black;
+    width: 2px;
+}
