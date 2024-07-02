@@ -6,6 +6,7 @@ QPushButton#LetterButton {
     background-color: whitesmoke;
     color: black;
     border-radius: 10px;
+    border: 2px solid whitesmoke;
     min-width: 100px;
     min-height: 100px;
     max-width: 100px;
@@ -13,14 +14,14 @@ QPushButton#LetterButton {
 }
 
 QPushButton#LetterButton:hover {
-    background-color: lightskyblue;
+    background-color: rgb(204, 216, 255);
 }
 
 QPushButton#LetterSelected {
-    background-color: cornflowerblue;
-    border: blue;
+    background-color: rgb(204, 216, 255);
     color: black;
     border-radius: 10px;
+    border: 2px solid rgb(204, 216, 255);
     min-width: 100px;
     min-height: 100px;
     max-width: 100px;
@@ -28,10 +29,11 @@ QPushButton#LetterSelected {
 }
 
 QPushButton#LetterSelectedLast {
-    background-color: darkslateblue;
+    background-color: rgb(204, 216, 255);
     border: blue;
     color: black;
     border-radius: 10px;
+    border: 2px solid blue;
     min-width: 100px;
     min-height: 100px;
     max-width: 100px;
