@@ -12,52 +12,55 @@ from PyQt5.QtGui import QFont
 class GameUI(QWidget):
     def __init__(self, board):
         super().__init__()
+
+        self.buttons = []
         self.clicked_letters = '|'
         self.selected_letters = []
+        self.allowed_letters = []
+
         self.board = board
+
         self.initUI()
 
     def initUI(self):
         main_layout = QVBoxLayout()
         self.setLayout(main_layout)
 
-        # Add spacing between the line and the grid
-        main_layout.addSpacerItem(QSpacerItem(0, 50, QSizePolicy.Minimum, QSizePolicy.Minimum))
+        h_spacer = QSpacerItem(0, 50, QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        # Load stylesheet
+        sshFile = "style.qss"
+        with open(sshFile, "r") as fh:
+            self.setStyleSheet(fh.read())
+
+        # Add spacing between title bar and selected letters
+        main_layout.addSpacerItem(h_spacer)
         
-        # Label to display clicked letters
+        # Label to display clicked letters on the top
         self.letter_display = QLabel(self.clicked_letters)
         self.letter_display.setFont(QFont('Roboto', 20))
         self.letter_display.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.letter_display)
 
-        # Blinking cursor
+        # Blinking cursor parameters
         self.cursor_visible = True
         self.cursor_timer = QTimer(self)
         self.cursor_timer.timeout.connect(self.toggleCursor)
         self.cursor_timer.start(500)
 
-        # Black line under the QLabel
+        # Black line under the clicked letter display
         self.line = QFrame()
         self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
+        self.line.setMinimumWidth(int(self.width() * 0.8))
         main_layout.addWidget(self.line)
 
-        # Set the length of the line to 80% of window width
-        self.line.setMinimumWidth(int(self.width() * 0.8))
-
-        # Add spacing between the line and the grid
-        main_layout.addSpacerItem(QSpacerItem(0, 50, QSizePolicy.Minimum, QSizePolicy.Minimum))
+        # Add spacing between the line and the letter grid
+        main_layout.addSpacerItem(h_spacer)
 
         # Grid layout for buttons
         grid = QGridLayout()
-        grid.setSpacing(20)  # Add 50px spacing between buttons
+        grid.setSpacing(20)
         main_layout.addLayout(grid)
-
-        sshFile = "style.qss"
-        with open(sshFile, "r") as fh:
-            self.setStyleSheet(fh.read())
-
-        self.buttons = []
 
         for i in range(self.board.board.shape[0]):
             row = []
@@ -91,9 +94,10 @@ class GameUI(QWidget):
         self.cursor_visible = not self.cursor_visible
 
         if self.cursor_visible:
-            self.clicked_letters = ' ' + self.clicked_letters + '|'
+            self.clicked_letters = ("<span style='color: white;'>|</span>"
+                                    + f"{self.clicked_letters}|")
         else:
-            self.clicked_letters = self.clicked_letters[1:-1]
+            self.clicked_letters = self.clicked_letters[36:-1]
 
         self.updateLetterLine()
 
@@ -108,14 +112,18 @@ class GameUI(QWidget):
         widget.update()
     
     def updateButtonStyles(self):
+        # Color selected letters
         for idx in self.selected_letters[:-1]:
             self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
                                    'LetterSelected')          
         
         idx = self.selected_letters[-1]
-
         self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
                                'LetterSelectedLast')
+        
+        # Color blocked buttons
+
+        # Color available buttons
 
     def buttonClicked(self):
         button = self.sender()
@@ -125,11 +133,9 @@ class GameUI(QWidget):
         else:
             self.clicked_letters += button.text()
 
-        self.updateLetterLine()
-
         self.selected_letters.append(button.property('index'))
-        print(self.selected_letters)
 
+        self.updateLetterLine()
         self.updateButtonStyles()
 
     def resetBoard(self):
