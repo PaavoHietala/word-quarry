@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import (QWidget,
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
 
+from pathlib import Path
+
 class GameUI(QWidget):
     def __init__(self, board):
         super().__init__()
@@ -33,7 +35,7 @@ class GameUI(QWidget):
         h_spacer = QSpacerItem(0, 50, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         # Load stylesheet
-        sshFile = "style.qss"
+        sshFile = Path(__file__).with_name('style.qss')
         with open(sshFile, "r") as fh:
             self.setStyleSheet(fh.read())
 

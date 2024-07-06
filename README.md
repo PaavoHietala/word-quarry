@@ -14,7 +14,7 @@ The game is able to create the grid of letters via a brute-force algorithm and t
 
 Screenshot of the UI:
 
-![](Images/ui.jpg)
+![](img/ui.jpg)
 
 ## Usage
 
