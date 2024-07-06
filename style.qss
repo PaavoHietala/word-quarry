@@ -41,11 +41,35 @@ QPushButton#LetterSelectedLast {
 }
 
 QPushButton#ResetButton {
-    background-color: blue;
+    background-color: rgb(110, 110, 255);
     color: white;
     border-radius: 10px;
+    min-height: 50px;
+    max-height: 100px;
 }
 QPushButton#ResetButton:hover {
+    background-color: lightgray;
+}
+
+QPushButton#HintButton {
+    background-color: whitesmoke;
+    color: black;
+    border-radius: 10px;
+    min-height: 50px;
+    max-height: 100px;
+}
+QPushButton#HintButton:hover {
+    background-color: lightgray;
+}
+
+QPushButton#CheckButton {
+    background-color: rgb(110, 110, 255);
+    color: white;
+    border-radius: 10px;
+    min-height: 50px;
+    max-height: 100px;
+}
+QPushButton#CheckButton:hover {
     background-color: lightgray;
 }
 

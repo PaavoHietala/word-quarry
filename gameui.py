@@ -1,6 +1,4 @@
 '''
-TODO: Combine clicked_letters and selected_letters
-TODO: Add all functionality to buttonClicked() (blocked squares)
 TODO: Create "check word"-button based on code in linetest.py
 '''
 
@@ -19,13 +17,13 @@ class GameUI(QWidget):
     def __init__(self, board):
         super().__init__()
 
-        self.buttons = []
-        self.clicked_letters = '|'
-        self.selected_letters = []
-        self.allowed_letters = []
-
         self.board = board
 
+        self.buttons = []
+        self.selected_letters = '|'
+        self.clicked_buttons = []
+        self.update_allowed()
+        
         self.initUI()
 
     def initUI(self):
@@ -43,9 +41,9 @@ class GameUI(QWidget):
         main_layout.addSpacerItem(h_spacer)
         
         # Label to display clicked letters on the top
-        self.letter_display = QLabel(self.clicked_letters)
+        self.letter_display = QLabel(self.selected_letters)
         self.letter_display.setFont(QFont('Roboto', 20))
-        self.letter_display.setAlignment(Qt.AlignCenter)
+        self.letter_display.setAlignment(Qt.AlignHCenter | Qt.AlignBottom)
         main_layout.addWidget(self.letter_display)
 
         # Blinking cursor parameters
@@ -78,19 +76,35 @@ class GameUI(QWidget):
                 button.setObjectName("LetterButton")
                 button.setProperty('index', (i,j))
 
-                button.clicked.connect(self.buttonClicked)
+                button.clicked.connect(self.button_clicked)
                 grid.addWidget(button, i, j)
                 row.append(button)
 
             self.buttons.append(row)
+        
+        # Add spacing between the letter grid and the bottom buttons
+        #grid.addSpacerItem(h_spacer)
 
         reset_button = QPushButton("Reset")
         reset_button.setFont(QFont('Roboto', 18))
         reset_button.setObjectName("ResetButton")
 
-        reset_button.clicked.connect(self.resetBoard)
-        grid.addWidget(reset_button, self.board.board.shape[0], 0, 1,
-                       self.board.board.shape[1])
+        reset_button.clicked.connect(self.reset_board)
+        grid.addWidget(reset_button, self.board.board.shape[0], 0, 1, 1)
+
+        hint_button = QPushButton("Hint")
+        hint_button.setFont(QFont('Roboto', 18))
+        hint_button.setObjectName("HintButton")
+
+        hint_button.clicked.connect(self.hint)
+        grid.addWidget(hint_button, self.board.board.shape[0], 2, 1, 1)
+
+        check_button = QPushButton("Check")
+        check_button.setFont(QFont('Roboto', 18))
+        check_button.setObjectName("CheckButton")
+
+        check_button.clicked.connect(self.check)
+        grid.addWidget(check_button, self.board.board.shape[0], 4, 1, 1)
 
         self.setWindowTitle('Word Quarry')
         self.show()
@@ -99,15 +113,15 @@ class GameUI(QWidget):
         self.cursor_visible = not self.cursor_visible
 
         if self.cursor_visible:
-            self.clicked_letters = ("<span style='color: white;'>|</span>"
-                                    + f"{self.clicked_letters}|")
+            self.selected_letters = ("<span style='color: white;'>|</span>"
+                                    + f"{self.selected_letters}|")
         else:
-            self.clicked_letters = self.clicked_letters[36:-1]
+            self.selected_letters = self.selected_letters[36:-1]
 
         self.updateLetterLine()
 
     def updateLetterLine(self):
-        self.letter_display.setText(self.clicked_letters)
+        self.letter_display.setText(self.selected_letters)
     
     def updateWidgetStyle(self, widget, name):
         widget.setObjectName(name)
@@ -116,56 +130,83 @@ class GameUI(QWidget):
         style.polish(widget)
         widget.update()
 
-    def buttonClicked(self):
+    def button_clicked(self):
         button = self.sender()
 
-        # Blocked is clicked
-
-        # Last selected is clicked
-        if len(self.selected_letters) > 0 and \
-           button.property('index') == self.selected_letters[-1]:
-            if self.cursor_visible:
-                self.clicked_letters = self.clicked_letters[:-2] + '|'
-            else:
-                self.clicked_letters = self.clicked_letters[:-1]
-
-            self.selected_letters.pop()
-
-            if len(self.selected_letters) > 0:
-                prev_idx = self.selected_letters[-1]
-                prev_btn = self.buttons[prev_idx[0]][prev_idx[1]]
-                self.updateWidgetStyle(prev_btn, 'LetterSelectedLast')
-
-            self.updateWidgetStyle(button, 'LetterButton')
-            self.updateLetterLine()
-
+        if button.property('index') not in self.allowed_letters:
+            # A blocked letter is clicked
             return
-
-        # Available is clicked
-        if self.cursor_visible == True:
-            self.clicked_letters = self.clicked_letters[:-1] + button.text() + '|'
+        elif (len(self.clicked_buttons) > 0 
+            and button.property('index') == self.clicked_buttons[-1]):
+            # The last selected letter is clicked
+            self.last_clicked(button)
         else:
-            self.clicked_letters += button.text()
+            # An allowed letter is clicked
+            self.allowed_clicked(button)
+    
+    def last_clicked(self, button):
+        if self.cursor_visible:
+            self.selected_letters = self.selected_letters[:-2] + '|'
+        else:
+            self.selected_letters = self.selected_letters[:-1]
+
+        self.clicked_buttons.pop()
+
+        if len(self.clicked_buttons) > 0:
+            prev_idx = self.clicked_buttons[-1]
+            prev_btn = self.buttons[prev_idx[0]][prev_idx[1]]
+            self.updateWidgetStyle(prev_btn, 'LetterSelectedLast')
+
+        self.updateWidgetStyle(button, 'LetterButton')
+        self.updateLetterLine()
+        self.update_allowed(button.property('index'))
+    
+    def allowed_clicked(self, button):
+        if self.cursor_visible == True:
+            self.selected_letters = self.selected_letters[:-1] + button.text() + '|'
+        else:
+            self.selected_letters += button.text()
 
         self.updateLetterLine()
 
-        if len(self.selected_letters) > 0:
-            for idx in self.selected_letters:
+        if len(self.clicked_buttons) > 0:
+            for idx in self.clicked_buttons:
                 self.updateWidgetStyle(self.buttons[idx[0]][idx[1]],
                                        'LetterSelected') 
 
         self.updateWidgetStyle(button, 'LetterSelectedLast')
 
-        self.selected_letters.append(button.property('index'))
+        self.clicked_buttons.append(button.property('index'))
+        self.update_allowed(button.property('index'))
 
-    def resetBoard(self):
-        self.clicked_letters = ''
-        self.selected_letters = []
+    def update_allowed(self, idx = None):
+        if len(self.clicked_buttons) == 0 or idx == None:
+            self.allowed_letters = [(x, y) for x in range(self.board.size[0])
+                                           for y in range(self.board.size[1])]
+        else:
+            self.allowed_letters = [(idx[0] + dx, idx[1] + dy)
+                                    for dx in (-1, 0, 1)
+                                    for dy in (-1, 0, 1)
+                                    if (idx[0] + dx, idx[1] + dy)
+                                    not in self.clicked_buttons
+                                    or (idx[0] + dx, idx[1] + dy)
+                                    == self.clicked_buttons[-1]]
+
+    def reset_board(self):
+        self.selected_letters = ''
+        self.clicked_buttons = []
 
         self.updateLetterLine()
+        self.update_allowed()
         self.board.fill_board()
 
         for i in range(self.board.board.shape[0]):
             for j in range(self.board.board.shape[1]):
                 self.buttons[i][j].setText(self.board.board[i, j].upper())
                 self.updateWidgetStyle(self.buttons[i][j], 'LetterButton')
+    
+    def hint(self):
+        pass
+
+    def check(self):
+        pass

@@ -3,22 +3,22 @@ import numpy as np
 import pandas as pd
 
 class Board:
-    def __init__(self, board_size, wordlist_path):
+    def __init__(self, size, wordlist_path):
         wordlist = pd.read_csv(wordlist_path)
         print(f'Loaded words, for example {random.choice(wordlist["word"])}')
 
-        self.board_size = board_size
+        self.size = size
         self.wordlist = pd.read_csv(wordlist_path)
         
-        self.board = self.create_board(board_size)
+        self.board = self.create_board(size)
 
-    def create_board(self, board_size):
+    def create_board(self, size):
         '''
         Create an X-by-Y board, initialized with underscores '_'.
 
         Parameters
         ----------
-        board_size : list of int
+        size : list of int
             Row and column count for the board
 
         Returns
@@ -27,7 +27,7 @@ class Board:
             2D board initialized with underscores
         '''
 
-        board = np.chararray(board_size, unicode = True)
+        board = np.chararray(size, unicode = True)
         board[:] = '_'
 
         return board
@@ -37,7 +37,7 @@ class Board:
         words = self.choose_words()
         
         while True:
-            self.board = self.create_board(self.board_size)
+            self.board = self.create_board(self.size)
             success = False
 
             for word in words:
