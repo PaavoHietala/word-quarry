@@ -10,7 +10,11 @@ Inspired by the ["Sanalouhos" game by Helsingin Sanomat (Mikko Kivistö, Katarii
 
 The repository has a script for extracting the usable words from the KOTUS list (`csv_to_wordlist.py`).
 
-The game is able to create the grid of letters via a brute-force algorithm, but the UI and actual game functionalities are still under development.
+The game is able to create the grid of letters via a brute-force algorithm and the UI allows the user to select letters and reset the board. The actual game functionality is still under development.
+
+Screenshot of the UI:
+
+![](Images/ui.jpg)
 
 ## Usage
 
