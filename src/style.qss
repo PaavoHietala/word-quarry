@@ -40,6 +40,17 @@ QPushButton#LetterSelectedLast {
     max-height: 100px;
 }
 
+QPushButton#CorrectLetter {
+    background-color: rgba(204, 216, 255, 0);
+    color: black;
+    border-radius: 10px;
+    border: 0px;
+    min-width: 100px;
+    min-height: 100px;
+    max-width: 100px;
+    max-height: 100px;
+}
+
 QPushButton#ResetButton {
     background-color: rgb(110, 110, 255);
     color: white;
@@ -71,6 +82,14 @@ QPushButton#CheckButton {
 }
 QPushButton#CheckButton:hover {
     background-color: lightgray;
+}
+
+QLabel#Popup {
+    background-color: rgb(204, 216, 255);
+    min-height: 100px;
+    max-height: 100px;
+    border-radius: 10px;
+    border: 0px;
 }
 
 QFrame {
