@@ -14,7 +14,7 @@ The game is able to create the grid of letters via a brute-force algorithm and t
 
 Screenshot of the UI:
 
-![](img/ui.jpg)
+![](https://github.com/PaavoHietala/word-quarry/assets/29782174/c8005d14-f1ae-4078-9e9d-b43ad2ddb009)
 
 ## Usage
 
