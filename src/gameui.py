@@ -1,3 +1,12 @@
+'''
+TODO: Hint functionality
+TODO: End game button which shows the correct result
+TODO: End game when the last word is correct
+TODO: Timer for end screen
+TODO: Config file with board size
+TODO: Clean up word list
+'''
+
 from PyQt5.QtWidgets import (QWidget,
                              QGridLayout,
                              QPushButton,
@@ -288,8 +297,6 @@ class GameUI(QWidget):
             The letter grid button clicked by the user
         '''
 
-        print(self.lines)
-
         for line in self.lines:
             if button.property('index') in line:
                 for idx in line:
@@ -298,8 +305,6 @@ class GameUI(QWidget):
                 self.lines.remove(line)
                 self.repaint()
                 break
-
-        print(self.lines)
 
     def update_allowed(self, idx = None):
         '''
