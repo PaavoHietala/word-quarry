@@ -4,8 +4,8 @@ from pathlib import Path
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 
-from src.gameui import GameUI
 from src.board import Board
+from src.uihandler import UIHandler
 
 if __name__ == "__main__":
     board_size = [6, 5]
@@ -15,5 +15,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     icon = QIcon(os.path.join(Path(__file__).with_name('img'), 'icon.jpg'))
     app.setWindowIcon(icon)
-    game = GameUI(board)
+
+    ui = UIHandler(board)
+
     sys.exit(app.exec_())

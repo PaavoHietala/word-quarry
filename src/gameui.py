@@ -1,4 +1,5 @@
 '''
+TODO: Accepted words on the bottom of the screen
 TODO: Hint functionality
 TODO: End game button which shows the correct result
 TODO: End game when the last word is correct
@@ -14,8 +15,7 @@ from PyQt5.QtWidgets import (QWidget,
                              QSpacerItem,
                              QLabel,
                              QSizePolicy,
-                             QVBoxLayout,
-                             QApplication)
+                             QVBoxLayout)
 from PyQt5.QtCore import Qt, QTimer, QPoint
 from PyQt5.QtGui import QFont, QPainter, QPen, QColor
 
@@ -33,7 +33,7 @@ class GameUI(QWidget):
         The base class of all PyQt UI objects
     '''
 
-    def __init__(self, board):
+    def __init__(self, board, uihandler):
         '''
         Initialize the Word Quarry UI with given pre-populated board.
 
@@ -63,6 +63,7 @@ class GameUI(QWidget):
         super().__init__()
 
         self.board = board
+        self.uihandler = uihandler
 
         self.buttons = []
         self.selected_letters = '|'
@@ -71,13 +72,6 @@ class GameUI(QWidget):
         self.update_allowed()
         
         self.initUI()
-
-        frame_gm = self.frameGeometry()
-        cursor_pos = QApplication.desktop().cursor().pos()
-        screen = QApplication.desktop().screenNumber(cursor_pos)
-        center_point = QApplication.desktop().screenGeometry(screen).center()
-        frame_gm.moveCenter(center_point)
-        self.move(frame_gm.topLeft())
 
     def initUI(self):
         '''
@@ -88,7 +82,7 @@ class GameUI(QWidget):
         self.setLayout(main_layout)
 
         h_spacer = QSpacerItem(0, 50, QSizePolicy.Minimum, QSizePolicy.Minimum)
-
+        
         # Load stylesheet
         qss_fpath = Path(__file__).with_name('style.qss')
         with open(qss_fpath, "r") as fh:
@@ -361,8 +355,6 @@ class GameUI(QWidget):
                       for i, j in line]
 
             painter.drawPolyline(*points)
-        
-        self.update()
 
     def reset_board(self):
         '''
@@ -433,6 +425,10 @@ class GameUI(QWidget):
             self.lines.append(self.clicked_buttons)
             self.repaint()
             self.remove_pending_word(correct = True)
+
+            cells = self.board.size[0] * self.board.size[1]
+            if sum(len(line) for line in self.lines) == cells:
+                self.uihandler.show_endgame()
         else:
             if len(word) == 0:
                 self.show_fade_popup("Click letters to form a word")

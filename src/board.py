@@ -3,7 +3,23 @@ import numpy as np
 import pandas as pd
 
 class Board:
+    '''
+    A class which holds the letter grid for the game and the associated wordlist
+    which is given as a file path
+    '''
+
     def __init__(self, size, wordlist_path):
+        '''
+        Initialize the Board object
+
+        Parameters
+        ----------
+        size : list of int
+            Rows and columns of the board
+        wordlist_path : str
+            Path to a wordlist .csv file, which has rows of <word,len(word)>
+        '''
+
         wordlist = pd.read_csv(wordlist_path)
         print(f'Loaded words, for example {random.choice(wordlist["word"])}')
 
